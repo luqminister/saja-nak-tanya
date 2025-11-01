@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Saja Nak Tahu 😎</title>
+  <meta name="description" content="Mini quiz comel — Saja Nak Tahu. Pastel, kucing doodle, responsive." />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1:#fff6ff; --bg2:#e8fbff; --bg3:#fffaf0;
+      --card:rgba(255,255,255,0.98);
+      --accent1:#ff9ec9; --accent2:#a6e3f5; --accent3:#fff59d;
+      --muted:#6e7378; --text:#242628;
+      --ui-radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;}
+    body{
+      margin:0; font-family:Poppins,system-ui,Arial; -webkit-font-smoothing:antialiased;
+      background: linear-gradient(180deg,var(--bg2),var(--bg1));
+      display:flex;align-items:center;justify-content:center;padding:20px;
+    }
+
+    /* Container */
+    .frame{width:100%;max-width:460px;background:var(--card);border-radius:20px;box-shadow:0 12px 40px rgba(20,20,40,0.08);overflow:hidden;position:relative}
+    header{display:flex;gap:12px;align-items:center;padding:18px}
+    .logo{width:56px;height:56px;border-radius:12px;background:conic-gradient(from 110deg,var(--accent1),var(--accent2),var(--accent3));display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    h1{margin:0;font-size:18px}
+    p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    main{padding:18px;padding-top:6px;min-height:320px;position:relative;z-index:3}
+
+    /* progress */
+    .progressWrap{padding:0 18px 8px}
+    .progress{height:8px;background:#ffffffaa;border-radius:999px;overflow:hidden}
+    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent1),var(--accent3));width:0;transition:width .36s ease}
+
+    /* slide */
+    .slide{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:10px;transition:transform .36s cubic-bezier(.2,.9,.2,1),opacity .36s;}
+    .slide.enter{opacity:0;transform:translateX(30px)}
+    .question{font-weight:600;color:var(--text);font-size:16px}
+
+    .choices{width:100%;display:flex;flex-direction:column;gap:10px}
+    .choice{background:linear-gradient(180deg,#fff,#fffaf2);border-radius:12px;padding:10px 12px;border:1px solid #f0e9f6;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:transform .16s ease,box-shadow .16s ease}
+    .choice:hover{transform:translateY(-6px);box-shadow:0 14px 30px rgba(30,30,60,0.06)}
+    .choice.selected{outline:3px solid rgba(166,227,245,0.35)}
+    .small{font-size:13px;color:var(--muted)}
+
+    .controls{display:flex;justify-content:space-between;gap:10px;margin-top:14px}
+    .btn{flex:1;padding:10px;border-radius:12px;border:0;font-weight:600;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--muted)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent2),var(--accent1));color:#163144}
+
+    /* text input */
+    textarea.text-input{width:100%;padding:10px;border-radius:10px;border:1px dashed #eee;background:#fff;resize:none}
+
+    footer{padding:14px 18px;color:var(--muted);font-size:13px;text-align:center;z-index:3}
+
+    /* cloud background */
+    .sky{position:absolute;inset:0;pointer-events:none;z-index:0}
+    .cloud{position:absolute;width:220px;height:80px;background:rgba(255,255,255,0.92);border-radius:60px;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.04));opacity:0.95}
+    .cloud.small{width:140px;height:50px;border-radius:40px}
+    .cloud::before{content:'';position:absolute;left:18px;top:-18px;width:70px;height:70px;border-radius:50%/45%}
+    .cloud::after{content:'';position:absolute;right:18px;top:-12px;width:50px;height:50px;border-radius:50%/45%}
+    /* animate clouds */
+    @keyframes floatL{0%{transform:translateX(-30px)}50%{transform:translateX(20px)}100%{transform:translateX(-30px)}}
+    @keyframes floatR{0%{transform:translateX(30px)}50%{transform:translateX(-20px)}100%{transform:translateX(30px)}}
+
+    .cloud.c1{left:-20px;top:10%;animation:floatL 12s ease-in-out infinite}
+    .cloud.c2{right:-30px;top:28%;animation:floatR 10s ease-in-out infinite}
+    .cloud.c3{left:10%;bottom:8%;width:180px;height:60px;animation:floatL 9s ease-in-out infinite}
+
+    /* doodle cats container (pointer-events enabled so cats clickable) */
+    .cats{position:absolute;inset:0;pointer-events:auto;z-index:2}
+    .cat{position:absolute;pointer-events:auto;width:92px;height:92px;display:flex;align-items:center;justify-content:center;transform-origin:center;cursor:pointer}
+    /* one walks left->right, other sits & bounces */
+    .cat.c1{left:10px;bottom:14%;animation:walk 8s linear infinite}
+    .cat.c2{right:18px;bottom:20%;animation:floaty 4s ease-in-out infinite}
+
+    @keyframes walk{0%{transform:translateX(-60px) scale(0.95)}45%{transform:translateX(220px) scale(1)}50%{transform:translateX(220px) scale(1.02)}100%{transform:translateX(-60px) scale(0.95)}}
+    @keyframes floaty{0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)}}
+
+    /* star sparkle style (created/animated via JS) */
+    .star{position:absolute;pointer-events:none;width:14px;height:14px;transform:scale(0);opacity:0}
+
+    /* confetti on finish */
+    .confetti{position:fixed;pointer-events:none}
+
+    /* responsive */
+    @media (max-width:480px){
+      .frame{border-radius:16px}
+      .cat{width:68px;height:68px}
+    }
+
+  </style>
+</head>
+<body>
+  <div class="frame" role="application">
+    <div class="sky" aria-hidden>
+      <div class="cloud c1"></div>
+      <div class="cloud c2"></div>
+      <div class="cloud c3 small"></div>
+    </div>
+
+    <header>
+      <div class="logo">SN</div>
+      <div>
+        <h1>Saja Nak Tahu 😎</h1>
+        <p class="lead">Jawab cepat‑cepat. Tak lama. Tak de tekanan.</p>
+      </div>
+    </header>
+
+    <div class="progressWrap"><div class="progress"><i id="bar"></i></div></div>
+
+    <main id="app">
+      <!-- slides rendered by JS -->
+    </main>
+
+    <div class="cats" id="catsLayer">
+      <!-- cat elements injected here -->
+    </div>
+
+    <footer id="foot">Dah siap nanti: “Okay noted 😎 nanti aku fikirkan sesuatu hehe.”</footer>
+  </div>
+
+  <script>
+    // ===== CONFIG =====
+    const GAS_ENDPOINT = '';// paste your Apps Script URL here to enable saving
+    // ==================
+
+    // Questions (original set + final service question)
+    const questions = [
+      {id:1,q:'Kalau hari cuti, kau prefer lepak luar ke dalam?',type:'choice',choices:['Luar - nak udara & jalan','Dalam - comfy je kat rumah']},
+      {id:2,q:'Tempat yang kau suka: ada aktiviti ke atau just chill tengok view?',type:'choice',choices:['Ada aktiviti - suka cuba benda baru','Just chill - suka view & lepak']},
+      {id:3,q:'Kalau jumpa tempat ada haiwan, kau excited ke biasa je?',type:'choice',choices:['Excited gila!','Biasa je / ikut je']},
+      {id:4,q:'Kalau boleh pilih suasana, kau pilih yang tenang ke yang meriah?',type:'choice',choices:['Tenang - chill & relax','Meriah - ada vibe & orang']},
+      {id:5,q:'Kalau nak keluar, kau jenis plan outfit dulu ke main redah je?',type:'choice',choices:['Plan - mesti match','Redah je - tak stress']},
+      {id:6,q:'Kau suka suasana panas sikit ke sejuk sikit?',type:'choice',choices:['Panas - sun & vibe','Sejuk - cozy & aircond']},
+      {id:7,q:'Kalau tempat makan, kau suka yang tenang atau ramai orang?',type:'choice',choices:['Tenang - senang borak','Ramai orang - best atmosphere']},
+      {id:8,q:'Kalau ada pilihan, kau lagi suka jalan‑jalan ke duduk lama sembang?',type:'choice',choices:['Jalan‑jalan - explore','Duduk sembang - deep talk']},
+      {id:9,q:'Tempat baru kau jenis excited nak explore ke lebih suka tempat biasa?',type:'choice',choices:['Excited nak explore','Lebih suka tempat biasa']},
+      {id:10,q:'Kalau aktiviti outdoor, kau suka yang adventure sikit ke santai‑santai je?',type:'choice',choices:['Adventure - thrill','Santai - chill je']},
+      {id:11,q:'Kalau nak cakap spesifik (contoh: alergi, tempat x), taip je:',type:'text'},
+      {id:12,q:'Service nanti kau nak yang mana?',type:'choice',choices:['Biasa-biasa je 😏','Luar biasa 🔥','Superb gilaaa 😎']}
+    ];
+
+    // state
+    let idx = 0; const answers = {}; const total = questions.length;
+
+    // UI refs
+    const app = document.getElementById('app');
+    const bar = document.getElementById('bar');
+    const catsLayer = document.getElementById('catsLayer');
+
+    // ---------- Micro-sound: pop using WebAudio API ----------
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = AudioCtx ? new AudioCtx() : null;
+    function popSound(){
+      if(!audioCtx) return;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(900, audioCtx.currentTime);
+      g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      o.connect(g); g.connect(audioCtx.destination);
+      const t = audioCtx.currentTime;
+      g.gain.exponentialRampToValueAtTime(0.12,t+0.005);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+      o.start(t); o.stop(t+0.14);
+    }
+
+    // ---------- helper to create DOM for slide ----------
+    function render(){
+      const q = questions[idx];
+      bar.style.width = `${(idx/total)*100}%`;
+      app.innerHTML = '';
+
+      const slide = document.createElement('div'); slide.className='slide';
+      const question = document.createElement('div'); question.className='question'; question.textContent = q.q;
+      slide.appendChild(question);
+
+      const choicesWrap = document.createElement('div'); choicesWrap.className='choices';
+
+      if(q.type === 'choice'){
+        q.choices.forEach((c,i)=>{
+          const b = document.createElement('div'); b.className='choice'; b.tabIndex=0; b.innerHTML = `<div>${c}</div><div class='small'>Pilih</div>`;
+          b.onclick = ()=>{ popSound(); document.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); answers[q.id]=c; setTimeout(()=> next(),140); };
+          b.onkeydown = (e)=>{ if(e.key==='Enter') b.click(); };
+          choicesWrap.appendChild(b);
+        });
+      } else {
+        const ta = document.createElement('textarea'); ta.className='text-input'; ta.rows=4; ta.placeholder='Taip kat sini...';
+        ta.oninput = ()=>{ answers[q.id] = ta.value };
+        choicesWrap.appendChild(ta);
+      }
+
+      slide.appendChild(choicesWrap);
+
+      const controls = document.createElement('div'); controls.className='controls';
+      const back = document.createElement('button'); back.className='btn ghost'; back.textContent='Kembali'; back.onclick = ()=>{ if(idx>0){ idx--; render(); } };
+      const nextBtn = document.createElement('button'); nextBtn.className='btn primary'; nextBtn.textContent = (idx===total-1)?'Hantar':'Next'; nextBtn.onclick = ()=>{ popSound(); next(); };
+      controls.appendChild(back); controls.appendChild(nextBtn);
+      slide.appendChild(controls);
+
+      app.appendChild(slide);
+      // entrance anim
+      requestAnimationFrame(()=>{ slide.classList.remove('enter'); });
+    }
+
+    function next(){
+      idx++;
+      if(idx < total) render(); else finish();
+    }
+
+    function finish(){
+      bar.style.width='100%';
+      app.innerHTML = '';
+      const done = document.createElement('div'); done.className='slide';
+      const t = document.createElement('h2'); t.textContent='Siap! Terima kasih 😎';
+      const s = document.createElement('p'); s.className='small'; s.textContent='Okay noted 😎 nanti aku fikirkan sesuatu hehe.';
+      done.appendChild(t); done.appendChild(s);
+      const close = document.createElement('button'); close.className='btn primary'; close.textContent='Tutup'; close.onclick=()=>{ window.location.reload(); };
+      done.appendChild(close);
+      app.appendChild(done);
+
+      // send data
+      const payload = { ts:new Date().toISOString(), answers:answers, list: Object.keys(answers).map(k=>answers[k]) };
+      if(GAS_ENDPOINT){
+        fetch(GAS_ENDPOINT, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+          .then(r=>console.log('saved'))
+          .catch(e=>console.warn('save fail',e));
+      } else {
+        console.log('No GAS_ENDPOINT. Payload:',payload);
+      }
+
+      // confetti
+      spawnConfetti();
+    }
+
+    // ---------- confetti ----------
+    function spawnConfetti(){
+      for(let i=0;i<25;i++){
+        const d = document.createElement('div'); d.className='confetti';
+        d.style.left = (10 + Math.random()*80)+'%'; d.style.top = (20 + Math.random()*60)+'%'; d.style.width = (6+Math.random()*10)+'px'; d.style.height = (6+Math.random()*10)+'px';
+        d.style.background = `hsl(${Math.random()*360},70%,70%)`; d.style.position='absolute'; d.style.zIndex=9999;
+        d.style.transform = `translateY(0)`; d.style.opacity=1;
+        document.body.appendChild(d);
+        const dy = 300 + Math.random()*200;
+        d.animate([{transform:'translateY(0) rotate(0deg)', opacity:1},{transform:`translateY(${dy}px) rotate(360deg)`, opacity:0}],{duration:1200+Math.random()*700,easing:'cubic-bezier(.2,.8,.2,1)'});
+        setTimeout(()=>d.remove(),2000);
+      }
+    }
+
+    // ---------- cats: doodle SVGs + interactivity ----------
+    function createCat(id, variant){
+      const wrap = document.createElement('div'); wrap.className='cat '+id; wrap.style.pointerEvents='auto'; wrap.style.touchAction='manipulation'; wrap.style.cursor='pointer';
+      wrap.innerHTML = `
+        <svg viewBox="0 0 120 120" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+          <g transform="translate(10,8)">
+            <ellipse cx="45" cy="64" rx="34" ry="20" fill="#ffeedd" stroke="#7a4f3f" stroke-width="3"/>
+            <circle cx="45" cy="38" r="28" fill="#ffeedd" stroke="#7a4f3f" stroke-width="3"/>
+            <path d="M28 26 q-6 -6 -14 -4 q6 8 8 12" fill="#ffeedd" stroke="#7a4f3f" stroke-width="3"/>
+            <path d="M62 26 q6 -6 14 -4 q-6 8 -8 12" fill="#ffeedd" stroke="#7a4f3f" stroke-width="3"/>
+            <circle cx="38" cy="36" r="3" fill="#7a4f3f"/>
+            <circle cx="52" cy="36" r="3" fill="#7a4f3f"/>
+            <path d="M38 46 q7 6 14 0" fill="none" stroke="#7a4f3f" stroke-width="2" stroke-linecap="round"/>
+          </g>
+        </svg>
+      `;
+
+      // click interaction: pet -> jump + star sparkle
+      wrap.addEventListener('click', (e)=>{ e.stopPropagation(); popSound(); petAnimStars(wrap); });
+      wrap.addEventListener('keydown', (e)=>{ if(e.key==='Enter') { e.preventDefault(); popSound(); petAnimStars(wrap); } });
+      return wrap;
+    }
+
+    // star-shaped sparkle animation (creates multiple small SVG stars that fly out then fade)
+    function petAnimStars(el){
+      // small jump animation
+      el.animate([{transform:'translateY(0)'},{transform:'translateY(-22px)'},{transform:'translateY(0)'}],{duration:420,easing:'cubic-bezier(.2,.9,.2,1)'});
+      // create multiple stars
+      const rect = el.getBoundingClientRect();
+      const parentRect = document.body.getBoundingClientRect();
+      for(let i=0;i<6;i++){
+        const sx = rect.left + rect.width/2 + (Math.random()*80-40);
+        const sy = rect.top + (Math.random()*20-10);
+        const star = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        star.setAttribute('width','18'); star.setAttribute('height','18'); star.setAttribute('viewBox','0 0 24 24');
+        star.style.position='absolute'; star.style.left = (sx)+'px'; star.style.top = (sy)+'px'; star.style.zIndex = 9999; star.style.pointerEvents='none';
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d','M12 2 L14.9 8.3 L21.8 9.2 L16.4 13.7 L17.9 20.6 L12 17.1 L6.1 20.6 L7.6 13.7 L2.2 9.2 L9.1 8.3 Z');
+        path.setAttribute('fill',`hsl(${Math.random()*60+40},80%,80%)`);
+        star.appendChild(path);
+        document.body.appendChild(star);
+        const dx = (Math.random()*120 - 60);
+        const dy = -(80 + Math.random()*140);
+        const rot = (Math.random()*720 - 360);
+        star.animate([
+          {transform:`translate(0px,0px) rotate(0deg) scale(0.3)`, opacity:0},
+          {transform:`translate(${dx}px,${dy}px) rotate(${rot}deg) scale(1)`, opacity:1},
+          {transform:`translate(${dx*1.2}px,${dy*1.6}px) rotate(${rot*1.4}deg) scale(0.2)`, opacity:0}
+        ],{duration:800+Math.random()*500,easing:'cubic-bezier(.2,.9,.2,1)'});
+        setTimeout(()=>star.remove(),1400);
+      }
+    }
+
+    // inject cats
+    function setupCats(){
+      const c1 = createCat('c1','walk');
+      const c2 = createCat('c2','sit');
+      catsLayer.appendChild(c1); catsLayer.appendChild(c2);
+    }
+
+    // init
+    setupCats(); render();
+
+    // make sure audio context resumes on first user gesture (mobile compatibility)
+    document.addEventListener('click', ()=>{ if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); },{once:true});
+
+  </script>
+
+  <!--
+  =====================
+  Google Apps Script (Apps Script Web App) — paste into Extensions > Apps Script
+  1) Create Google Sheet, note its ID from URL
+  2) Replace SPREADSHEET_ID below
+  3) Deploy > New deployment > Web app (Execute as: Me, Who has access: Anyone)
+
+  Code.gs
+  ----------------------------------------------------
+  const SPREADSHEET_ID = 'PUT_YOUR_SPREADSHEET_ID_HERE';
+  const SHEET_NAME = 'Responses';
+
+  function doPost(e){
+    try{
+      const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+      const sheet = ss.getSheetByName(SHEET_NAME) || ss.getActiveSheet();
+      const data = JSON.parse(e.postData.contents || '{}');
+      const row = [new Date(), data.ts || '', JSON.stringify(data.answers || {}), (data.list||[]).join(' | ')];
+      sheet.appendRow(row);
+      return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
+    }catch(err){
+      return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.message})).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+  ----------------------------------------------------
+  -->
+</body>
+</html>
